@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cat/models/act_fact_model/cat_fact_model.dart';
@@ -160,8 +158,6 @@ class CatImagesBloc extends Bloc<CatImagesEvent, CatImagesInitial> {
 
       if (responseFavoriteId != null) {
         final List<CatImageModel> newList = [...state.catImagesList];
-
-        log('find');
 
         newList[event.itemId] = state.catImagesList[event.itemId].copyWith(
           favoriteId: responseFavoriteId,

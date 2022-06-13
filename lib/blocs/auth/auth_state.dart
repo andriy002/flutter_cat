@@ -1,7 +1,9 @@
 part of 'auth_bloc.dart';
 
 class AuthInitial {
-  AuthInitial({this.status = BlocStatus.initial});
+  AuthInitial({
+    this.status = BlocStatus.initial,
+  });
   final BlocStatus status;
 
   AuthInitial copyWith({

@@ -26,8 +26,10 @@ class _FavoritePageState extends State<FavoritePage> {
 
   @override
   void initState() {
+    if (mounted) {
+      _checkInternet();
+    }
     super.initState();
-    _checkInternet();
   }
 
   Future<void> _checkInternet() async {

@@ -29,7 +29,9 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   void initState() {
+    if (mounted) {}
     _setInitialData();
+
     super.initState();
   }
 
