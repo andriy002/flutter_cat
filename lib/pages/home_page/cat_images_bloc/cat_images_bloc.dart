@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_cat/models/act_fact_model/cat_fact_model.dart';
 import 'package:flutter_cat/models/act_fact_model/cat_fact_response_model.dart';
@@ -45,63 +46,77 @@ class CatImagesBloc extends Bloc<CatImagesEvent, CatImagesInitial> {
             );
           }
         } else {
-          final CatImagesResponseModel? catApiCacheList =
-              await CacheServices.instance.getCatApiCacheList();
-
-          final CatFactResponseModel? catFactApiCacheList =
-              await CacheServices.instance.getCatFactApiCacheList();
-
-          if (catApiCacheList != null && catFactApiCacheList != null) {
-            emit(
-              state.copyWith(
-                status: BlocStatus.success,
-                catImagesList: catApiCacheList.catImagesList,
-                catFactsList: catFactApiCacheList.catFactsList,
-                paginationCatImage: catApiCacheList.pagination,
-              ),
-            );
-          } else {
-            emit(state.copyWith(
-              status: BlocStatus.success,
-            ));
-          }
+          add(GetCacheList());
         }
       }),
     );
 
-    on<GetPaginationList>((event, emit) async {
-      final CatImagesResponseModel? responseCatImages =
-          await catImagesRepository.getCatImages(
-        page: event.loadMore ? state.paginationCatImage.currentPage + 1 : 0,
-      );
+    on<GetCacheList>((event, emit) async {
+      final CatImagesResponseModel? catApiCacheList =
+          await CacheServices.instance.getCatApiCacheList();
 
-      final CatFactResponseModel? responseCatFact =
-          await catFactRepository.getCatFacts(
-        page: event.loadMore ? state.paginationCatFact.currentPage + 1 : 0,
-      );
+      final CatFactResponseModel? catFactApiCacheList =
+          await CacheServices.instance.getCatFactApiCacheList();
 
-      if (responseCatImages != null && responseCatFact != null) {
+      if (catApiCacheList != null && catFactApiCacheList != null) {
         emit(
           state.copyWith(
-            catImagesList: event.loadMore
-                ? [...state.catImagesList, ...responseCatImages.catImagesList]
-                : [...responseCatImages.catImagesList],
-            paginationCatImage: responseCatImages.pagination,
-            catFactsList: event.loadMore
-                ? [...state.catFactsList, ...responseCatFact.catFactsList]
-                : [...responseCatFact.catFactsList],
-            paginationCatFact: state.paginationCatFact.totalRecords <=
-                    state.catFactsList.length + 30
-                ? const PaginationCatFactModel(currentPage: 0)
-                : responseCatFact.pagination,
+            status: BlocStatus.success,
+            catImagesList: [
+              ...state.catImagesList,
+              ...catApiCacheList.catImagesList
+            ],
+            catFactsList: [
+              ...state.catFactsList,
+              ...catFactApiCacheList.catFactsList
+            ],
+            paginationCatImage: catApiCacheList.pagination,
           ),
         );
       } else {
-        emit(
-          state.copyWith(
-            status: BlocStatus.failed,
-          ),
+        emit(state.copyWith(
+          status: BlocStatus.success,
+        ));
+      }
+    });
+
+    on<GetPaginationList>((event, emit) async {
+      try {
+        final CatImagesResponseModel? responseCatImages =
+            await catImagesRepository.getCatImages(
+          page: event.loadMore ? state.paginationCatImage.currentPage + 1 : 0,
         );
+
+        final CatFactResponseModel? responseCatFact =
+            await catFactRepository.getCatFacts(
+          page: event.loadMore ? state.paginationCatFact.currentPage + 1 : 0,
+        );
+
+        if (responseCatImages != null && responseCatFact != null) {
+          emit(
+            state.copyWith(
+              catImagesList: event.loadMore
+                  ? [...state.catImagesList, ...responseCatImages.catImagesList]
+                  : [...responseCatImages.catImagesList],
+              paginationCatImage: responseCatImages.pagination,
+              catFactsList: event.loadMore
+                  ? [...state.catFactsList, ...responseCatFact.catFactsList]
+                  : [...responseCatFact.catFactsList],
+              paginationCatFact: state.paginationCatFact.totalRecords <=
+                      state.catFactsList.length + 30
+                  ? const PaginationCatFactModel(currentPage: 0)
+                  : responseCatFact.pagination,
+            ),
+          );
+        } else {
+          emit(
+            state.copyWith(
+              status: BlocStatus.failed,
+            ),
+          );
+        }
+      } on DioError {
+        add(GetCacheList());
       }
     });
 

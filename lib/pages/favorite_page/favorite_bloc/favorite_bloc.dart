@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_cat/models/act_fact_model/cat_fact_model.dart';
 import 'package:flutter_cat/models/act_fact_model/cat_fact_response_model.dart';
 import 'package:flutter_cat/models/act_fact_model/pagination_model.dart';
@@ -27,86 +28,103 @@ class CatFavoriteImagesBloc
     on<GetInitialList>(
       ((event, emit) async {
         if (await InternetConnectionChecker().hasConnection) {
-          final CatFavoriteImagesResponseModel? responseCatFavoriteImage =
-              await catImagesRepository.getFavoriteImages();
+          try {
+            final CatFavoriteImagesResponseModel? responseCatFavoriteImage =
+                await catImagesRepository.getFavoriteImages();
 
-          final CatFactResponseModel? responseCatFact =
-              await catFactRepository.getInitialCatFacts();
+            final CatFactResponseModel? responseCatFact =
+                await catFactRepository.getInitialCatFacts();
 
-          if (responseCatFavoriteImage != null && responseCatFact != null) {
-            emit(
-              state.copyWith(
-                status: BlocStatus.success,
-                catImagesList: responseCatFavoriteImage.catImagesList,
-                catFactsList: responseCatFact.catFactsList,
-                paginationCatList: responseCatFavoriteImage.pagination,
-                paginationCatFact: responseCatFact.pagination,
-              ),
-            );
+            if (responseCatFavoriteImage != null && responseCatFact != null) {
+              emit(
+                state.copyWith(
+                  status: BlocStatus.success,
+                  catImagesList: responseCatFavoriteImage.catImagesList,
+                  catFactsList: responseCatFact.catFactsList,
+                  paginationCatList: responseCatFavoriteImage.pagination,
+                  paginationCatFact: responseCatFact.pagination,
+                ),
+              );
+            }
+          } on DioError {
+            add(GetCacheList());
           }
         } else {
-          final CatFavoriteImagesResponseModel? catApiFavoriteImageCacheList =
-              await CacheServices.instance.getCatApiFavoriteImagesCacheList();
-
-          final CatFactResponseModel? catFactApiCacheList =
-              await CacheServices.instance.getCatFactApiCacheList();
-
-          if (catApiFavoriteImageCacheList != null &&
-              catFactApiCacheList != null) {
-            emit(
-              state.copyWith(
-                status: BlocStatus.success,
-                catImagesList: catApiFavoriteImageCacheList.catImagesList,
-                catFactsList: catFactApiCacheList.catFactsList,
-                paginationCatList: const PaginationCatImageModel(),
-              ),
-            );
-          } else {
-            emit(
-              state.copyWith(
-                status: BlocStatus.success,
-              ),
-            );
-          }
+          add(GetCacheList());
         }
       }),
     );
 
-    on<GetFavoriteCatsList>((event, emit) async {
-      final CatFavoriteImagesResponseModel? responseCatImagesList =
-          await catImagesRepository.getFavoriteImages(
-        page: event.loadMore ? state.paginationCatList.currentPage + 1 : 0,
-      );
+    on<GetCacheList>((event, emit) async {
+      final CatFavoriteImagesResponseModel? catApiFavoriteImageCacheList =
+          await CacheServices.instance.getCatApiFavoriteImagesCacheList();
 
-      final CatFactResponseModel? responseCatFact =
-          await catFactRepository.getCatFacts(
-        page: event.loadMore ? state.paginationCatFact.currentPage + 1 : 0,
-      );
+      final CatFactResponseModel? catFactApiCacheList =
+          await CacheServices.instance.getCatFactApiCacheList();
 
-      if (responseCatImagesList != null && responseCatFact != null) {
+      if (catApiFavoriteImageCacheList != null && catFactApiCacheList != null) {
         emit(
           state.copyWith(
-              catImagesList: event.loadMore
-                  ? [
-                      ...state.catImagesList,
-                      ...responseCatImagesList.catImagesList
-                    ]
-                  : [...responseCatImagesList.catImagesList],
-              catFactsList: event.loadMore
-                  ? [...state.catFactsList, ...responseCatFact.catFactsList]
-                  : [...responseCatFact.catFactsList],
-              paginationCatList: responseCatImagesList.pagination,
-              paginationCatFact: state.paginationCatFact.totalRecords <=
-                      state.catFactsList.length + 30
-                  ? const PaginationCatFactModel(currentPage: 0)
-                  : responseCatFact.pagination),
+            status: BlocStatus.success,
+            catImagesList: [
+              ...state.catImagesList,
+              ...catApiFavoriteImageCacheList.catImagesList
+            ],
+            catFactsList: [
+              ...state.catFactsList,
+              ...catFactApiCacheList.catFactsList
+            ],
+            paginationCatList: const PaginationCatImageModel(),
+          ),
         );
       } else {
         emit(
           state.copyWith(
-            status: BlocStatus.failed,
+            status: BlocStatus.success,
           ),
         );
+      }
+    });
+
+    on<GetFavoriteCatsList>((event, emit) async {
+      try {
+        final CatFavoriteImagesResponseModel? responseCatImagesList =
+            await catImagesRepository.getFavoriteImages(
+          page: event.loadMore ? state.paginationCatList.currentPage + 1 : 0,
+        );
+
+        final CatFactResponseModel? responseCatFact =
+            await catFactRepository.getCatFacts(
+          page: event.loadMore ? state.paginationCatFact.currentPage + 1 : 0,
+        );
+
+        if (responseCatImagesList != null && responseCatFact != null) {
+          emit(
+            state.copyWith(
+                catImagesList: event.loadMore
+                    ? [
+                        ...state.catImagesList,
+                        ...responseCatImagesList.catImagesList
+                      ]
+                    : [...responseCatImagesList.catImagesList],
+                catFactsList: event.loadMore
+                    ? [...state.catFactsList, ...responseCatFact.catFactsList]
+                    : [...responseCatFact.catFactsList],
+                paginationCatList: responseCatImagesList.pagination,
+                paginationCatFact: state.paginationCatFact.totalRecords <=
+                        state.catFactsList.length + 30
+                    ? const PaginationCatFactModel(currentPage: 0)
+                    : responseCatFact.pagination),
+          );
+        } else {
+          emit(
+            state.copyWith(
+              status: BlocStatus.failed,
+            ),
+          );
+        }
+      } on DioError {
+        add(GetCacheList());
       }
     });
 

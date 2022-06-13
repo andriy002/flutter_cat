@@ -32,3 +32,5 @@ class DisLikeCatImage extends CatFavoriteImagesEvent {
   final int itemId;
   final String imageId;
 }
+
+class GetCacheList extends CatFavoriteImagesEvent {}

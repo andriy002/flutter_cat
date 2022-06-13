@@ -39,3 +39,5 @@ class SetFavoriteId extends CatImagesEvent {
   final int itemId;
   final String imageId;
 }
+
+class GetCacheList extends CatImagesEvent {}
