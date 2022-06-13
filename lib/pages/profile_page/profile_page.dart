@@ -83,6 +83,8 @@ class _ProfilePageState extends State<ProfilePage> {
                           ? CachedNetworkImage(
                               imageUrl: _user!.photoUrl!,
                               fit: BoxFit.contain,
+                              errorWidget: (context, url, error) =>
+                                  const Icon(Icons.error),
                               progressIndicatorBuilder: (_, __, progress) =>
                                   ImageLoader(
                                     progress: progress,
