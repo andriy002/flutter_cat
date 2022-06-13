@@ -16,24 +16,17 @@ class AuthPage extends StatefulWidget {
 }
 
 class _AuthPageState extends State<AuthPage> {
-  bool _isHasConnection = true;
-
   @override
   void initState() {
     _checkInternet();
     super.initState();
   }
 
-  Future<void> _checkInternet() async {
+  Future<bool> _checkInternet() async {
     if (await InternetConnectionChecker().hasConnection) {
-      setState(() {
-        _isHasConnection = true;
-      });
-    } else {
-      setState(() {
-        _isHasConnection = false;
-      });
+      return true;
     }
+    return false;
   }
 
   @override
@@ -74,8 +67,8 @@ class _AuthPageState extends State<AuthPage> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 GestureDetector(
-                  onTap: () {
-                    if (_isHasConnection) {
+                  onTap: () async {
+                    if (await _checkInternet()) {
                       context.read<AuthBloc>().add(
                             SignInGoogle(),
                           );
@@ -87,8 +80,8 @@ class _AuthPageState extends State<AuthPage> {
                   ),
                 ),
                 GestureDetector(
-                  onTap: () {
-                    if (_isHasConnection) {
+                  onTap: () async {
+                    if (await _checkInternet()) {
                       context.read<AuthBloc>().add(
                             SignInFacebook(),
                           );
