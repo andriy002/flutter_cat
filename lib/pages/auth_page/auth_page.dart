@@ -44,7 +44,6 @@ class AuthPage extends StatelessWidget {
             const SizedBox(
               height: 60.0,
             ),
-
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
@@ -72,52 +71,6 @@ class AuthPage extends StatelessWidget {
                 ),
               ],
             )
-
-            // Padding(
-            //   padding: const EdgeInsets.all(50),
-            //   child: ElevatedButton(
-            //     child: Text('dasda'),
-            //     onPressed: () async {
-            //       // GoogleSignIn _googleSignIn = GoogleSignIn();
-            //       // final a = await _googleSignIn.signIn();
-            //       // final b = await a!.authentication;
-            //       // final q = GoogleAuthProvider.credential(
-            //       //   accessToken: b.accessToken,
-            //       //   idToken: b.idToken,
-            //       // );
-
-            //       // await FirebaseAuth.instance.signInWithCredential(q);
-
-            //       context.read<AuthBloc>().add(
-            //             SignInGoogle(),
-            //           );
-            //     },
-            //   ),
-            // ),
-            // Padding(
-            //   padding: const EdgeInsets.all(50),
-            //   child: ElevatedButton(
-            //     child: Text('das55'),
-            //     onPressed: () async {
-            //       context.read<AuthBloc>().add(
-            //             SignInFacebook(),
-            //           );
-
-            //       // final c = a.accessToken!.token;
-
-            //       // final b = FacebookAuthProvider.credential(c);
-
-            //       // await FirebaseAuth.instance.signInWithCredential(b);
-
-            //       // print(FirebaseAuth.instance.currentUser!.photoURL);
-
-            //       // final a = FirebaseAuth.instance.currentUser!.getIdToken();
-
-            //       // Navigator.of(context)
-            //       //     .pushNamedAndRemoveUntil(MainPage.routeName, (route) => false);
-            //     },
-            //   ),
-            // ),
           ],
         ),
       ),

@@ -24,7 +24,6 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.amber[800],
       elevation: 0.0,
       centerTitle: true,
       titleTextStyle: const TextStyle(

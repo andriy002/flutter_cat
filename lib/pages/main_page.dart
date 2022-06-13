@@ -59,6 +59,7 @@ class _MainPageState extends State<MainPage> {
           }
         },
         child: Scaffold(
+          backgroundColor: Colors.amber[800],
           body: Navigator(
             key: _navigatorKey,
             initialRoute: HomePage.routeName,

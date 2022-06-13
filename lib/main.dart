@@ -11,6 +11,7 @@ import 'package:flutter_cat/repositories/cat_api_repositories/cat_api_repositori
 
 import 'package:flutter_cat/repositories/cat_fact_repositories/cat_fact_repositories.dart';
 import 'package:flutter_cat/repositories/firebase_repositories/firebase_repositories.dart';
+import 'package:flutter_cat/resources/app_themes.dart';
 import 'package:flutter_cat/routes/app_router.dart';
 import 'package:flutter_cat/services/cache_service.dart';
 
@@ -56,9 +57,7 @@ class FlutterCat extends StatelessWidget {
         child: MaterialApp(
           title: 'Flutter Cat',
           debugShowCheckedModeBanner: false,
-          theme: ThemeData(
-            primarySwatch: Colors.blue,
-          ),
+          theme: AppThemes.light(),
           home: FirebaseAuth.instance.currentUser == null
               ? const AuthPage()
               : const MainPage(),
