@@ -54,7 +54,7 @@ class CatApiRepository {
     );
 
     if (response.statusCode == 200) {
-      if ((response.data as List).length > 10) {
+      if ((response.data as List).length == 10) {
         if (CacheServices.instance.isFirstSet('setFavoriteImages')) {
           CacheServices.instance.setElement(
             key: 'catFavoriteImages',
