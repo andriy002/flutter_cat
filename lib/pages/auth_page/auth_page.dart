@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cat/blocs/auth/auth_bloc.dart';
+import 'package:flutter_cat/blocs/auth_bloc/auth_bloc.dart';
 import 'package:flutter_cat/pages/main_page.dart';
 import 'package:flutter_cat/resources/app_images.dart';
 import 'package:flutter_cat/utils/constants.dart';

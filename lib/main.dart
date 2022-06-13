@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cat/blocs/auth/auth_bloc.dart';
+import 'package:flutter_cat/blocs/auth_bloc/auth_bloc.dart';
 import 'package:flutter_cat/pages/auth_page/auth_page.dart';
 import 'package:flutter_cat/pages/main_page.dart';
 import 'package:flutter_cat/repositories/cat_api_repositories/cat_api_repositories.dart';
