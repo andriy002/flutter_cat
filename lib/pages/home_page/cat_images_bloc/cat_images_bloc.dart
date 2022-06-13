@@ -27,29 +27,25 @@ class CatImagesBloc extends Bloc<CatImagesEvent, CatImagesInitial> {
   }) : super(const CatImagesInitial()) {
     on<GetInitialList>(
       ((event, emit) async {
-        if (await InternetConnectionChecker().hasConnection) {
-          try {
-            final CatImagesResponseModel? responseCatImage =
-                await catImagesRepository.getCatImages();
+        try {
+          final CatImagesResponseModel? responseCatImage =
+              await catImagesRepository.getCatImages();
 
-            final CatFactResponseModel? responseCatFact =
-                await catFactRepository.getInitialCatFacts();
+          final CatFactResponseModel? responseCatFact =
+              await catFactRepository.getInitialCatFacts();
 
-            if (responseCatImage != null && responseCatFact != null) {
-              emit(
-                state.copyWith(
-                  status: BlocStatus.success,
-                  catImagesList: responseCatImage.catImagesList,
-                  catFactsList: responseCatFact.catFactsList,
-                  paginationCatImage: responseCatImage.pagination,
-                  paginationCatFact: responseCatFact.pagination,
-                ),
-              );
-            }
-          } on DioError {
-            add(GetCacheList());
+          if (responseCatImage != null && responseCatFact != null) {
+            emit(
+              state.copyWith(
+                status: BlocStatus.success,
+                catImagesList: responseCatImage.catImagesList,
+                catFactsList: responseCatFact.catFactsList,
+                paginationCatImage: responseCatImage.pagination,
+                paginationCatFact: responseCatFact.pagination,
+              ),
+            );
           }
-        } else {
+        } on DioError {
           add(GetCacheList());
         }
       }),

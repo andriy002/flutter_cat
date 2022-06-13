@@ -27,29 +27,25 @@ class CatFavoriteImagesBloc
   }) : super(const CatFavoriteImagesInitial()) {
     on<GetInitialList>(
       ((event, emit) async {
-        if (await InternetConnectionChecker().hasConnection) {
-          try {
-            final CatFavoriteImagesResponseModel? responseCatFavoriteImage =
-                await catImagesRepository.getFavoriteImages();
+        try {
+          final CatFavoriteImagesResponseModel? responseCatFavoriteImage =
+              await catImagesRepository.getFavoriteImages();
 
-            final CatFactResponseModel? responseCatFact =
-                await catFactRepository.getInitialCatFacts();
+          final CatFactResponseModel? responseCatFact =
+              await catFactRepository.getInitialCatFacts();
 
-            if (responseCatFavoriteImage != null && responseCatFact != null) {
-              emit(
-                state.copyWith(
-                  status: BlocStatus.success,
-                  catImagesList: responseCatFavoriteImage.catImagesList,
-                  catFactsList: responseCatFact.catFactsList,
-                  paginationCatList: responseCatFavoriteImage.pagination,
-                  paginationCatFact: responseCatFact.pagination,
-                ),
-              );
-            }
-          } on DioError {
-            add(GetCacheList());
+          if (responseCatFavoriteImage != null && responseCatFact != null) {
+            emit(
+              state.copyWith(
+                status: BlocStatus.success,
+                catImagesList: responseCatFavoriteImage.catImagesList,
+                catFactsList: responseCatFact.catFactsList,
+                paginationCatList: responseCatFavoriteImage.pagination,
+                paginationCatFact: responseCatFact.pagination,
+              ),
+            );
           }
-        } else {
+        } on DioError {
           add(GetCacheList());
         }
       }),
