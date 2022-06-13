@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cat/blocs/favorite_bloc/favorite_bloc.dart';
 import 'package:flutter_cat/repositories/cat_api_repositories/cat_api_repositories.dart';
 import 'package:flutter_cat/repositories/cat_fact_repositories/cat_fact_repositories.dart';
+import 'package:flutter_cat/repositories/firebase_repositories/firestore_repositories.dart';
 import 'package:flutter_cat/utils/constants.dart';
 import 'package:flutter_cat/widgets/items/cat_Images_item.dart';
 import 'package:flutter_cat/widgets/navigation/custom_app_bar.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+
+import 'favorite_bloc/favorite_bloc.dart';
 
 class FavoritePage extends StatefulWidget {
   const FavoritePage({Key? key}) : super(key: key);
@@ -44,11 +46,13 @@ class _FavoritePageState extends State<FavoritePage> {
     required BuildContext context,
     required int favoriteId,
     required int itemId,
+    required String imageId,
   }) {
     context.read<CatFavoriteImagesBloc>().add(
           DisLikeCatImage(
             itemId: itemId,
             favoriteId: favoriteId,
+            imageId: imageId,
           ),
         );
   }
@@ -82,12 +86,14 @@ class _FavoritePageState extends State<FavoritePage> {
       body: BlocProvider<CatFavoriteImagesBloc>(
         create: (context) => CatFavoriteImagesBloc(
             catImagesRepository: context.read<CatApiRepository>(),
-            catFactRepository: context.read<CatFactRepository>())
+            catFactRepository: context.read<CatFactRepository>(),
+            firestoreRepositories: context.read<FirestoreRepositories>())
           ..add(
             GetInitialList(),
           ),
         child: BlocConsumer<CatFavoriteImagesBloc, CatFavoriteImagesInitial>(
           listener: (_, state) {
+            _refreshController.loadComplete();
             if (state.paginationCatList.totalRecords <=
                 state.catImagesList.length) {
               _refreshController.loadNoData();
@@ -127,6 +133,7 @@ class _FavoritePageState extends State<FavoritePage> {
                                 ),
                                 onTapDisLike: () => _disLikeCatImage(
                                   context: context,
+                                  imageId: state.catImagesList[i].imageId,
                                   itemId: i,
                                   favoriteId: state.catImagesList[i].favoriteId,
                                 ),

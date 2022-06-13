@@ -10,7 +10,8 @@ import 'package:flutter_cat/pages/main_page.dart';
 import 'package:flutter_cat/repositories/cat_api_repositories/cat_api_repositories.dart';
 
 import 'package:flutter_cat/repositories/cat_fact_repositories/cat_fact_repositories.dart';
-import 'package:flutter_cat/repositories/firebase_repositories/firebase_repositories.dart';
+import 'package:flutter_cat/repositories/firebase_repositories/firebase_auth_repositories.dart';
+import 'package:flutter_cat/repositories/firebase_repositories/firestore_repositories.dart';
 import 'package:flutter_cat/resources/app_themes.dart';
 import 'package:flutter_cat/routes/app_router.dart';
 import 'package:flutter_cat/services/cache_service.dart';
@@ -33,8 +34,10 @@ class FlutterCat extends StatelessWidget {
 
   static final CatApiRepository _catRepository = CatApiRepository();
   static final CatFactRepository _catFactRepository = CatFactRepository();
-  static final FireBaseRepositories _fireBaseRepositories =
-      FireBaseRepositories();
+  static final FirebaseAuthRepositories _fireBaseRepositories =
+      FirebaseAuthRepositories();
+  static final FirestoreRepositories _firestoreRepositories =
+      FirestoreRepositories();
 
   @override
   Widget build(BuildContext context) {
@@ -46,13 +49,16 @@ class FlutterCat extends StatelessWidget {
         RepositoryProvider<CatFactRepository>(
           create: (_) => _catFactRepository,
         ),
-        RepositoryProvider<FireBaseRepositories>(
+        RepositoryProvider<FirebaseAuthRepositories>(
           create: (_) => _fireBaseRepositories,
+        ),
+        RepositoryProvider<FirestoreRepositories>(
+          create: (_) => _firestoreRepositories,
         ),
       ],
       child: BlocProvider<AuthBloc>(
         create: (context) => AuthBloc(
-          fireBaseRepositories: context.read<FireBaseRepositories>(),
+          fireBaseRepositories: context.read<FirebaseAuthRepositories>(),
         ),
         child: MaterialApp(
           title: 'Flutter Cat',

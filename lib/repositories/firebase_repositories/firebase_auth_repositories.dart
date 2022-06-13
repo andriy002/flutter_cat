@@ -1,41 +1,43 @@
 import 'dart:developer';
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_cat/models/user_model/user_model.dart';
 import 'package:flutter_cat/services/cache_service.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 
-class FireBaseRepositories {
+class FirebaseAuthRepositories {
   static final _firebaseAuth = FirebaseAuth.instance;
 
   Future<bool?> signInGoogle() async {
     final GoogleSignIn googleSignIn = GoogleSignIn();
     final GoogleSignInAccount? signIn = await googleSignIn.signIn();
-    final GoogleSignInAuthentication authentication =
-        await signIn!.authentication;
-    final OAuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: authentication.accessToken,
-      idToken: authentication.idToken,
-    );
 
-    try {
-      await FirebaseAuth.instance.signInWithCredential(credential);
+    if (signIn != null) {
+      final GoogleSignInAuthentication authentication =
+          await signIn.authentication;
 
-      CacheServices.instance.setElement(
-        key: 'profile',
-        value: UserModel(
-          name: _firebaseAuth.currentUser!.displayName,
-          photoUrl: _firebaseAuth.currentUser!.photoURL,
-          email: _firebaseAuth.currentUser!.email,
-          uid: _firebaseAuth.currentUser!.uid,
-        ),
+      final OAuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: authentication.accessToken,
+        idToken: authentication.idToken,
       );
-      return true;
-    } catch (e) {
-      log(
-        e.toString(),
-      );
+      try {
+        await FirebaseAuth.instance.signInWithCredential(credential);
+
+        CacheServices.instance.setElement(
+          key: 'profile',
+          value: UserModel(
+            name: _firebaseAuth.currentUser!.displayName,
+            photoUrl: _firebaseAuth.currentUser!.photoURL,
+            email: _firebaseAuth.currentUser!.email,
+            uid: _firebaseAuth.currentUser!.uid,
+          ),
+        );
+        return true;
+      } catch (e) {
+        log(
+          e.toString(),
+        );
+      }
     }
 
     return null;

@@ -24,18 +24,18 @@ class LikeCatImage extends CatImagesEvent {
 class DisLikeCatImage extends CatImagesEvent {
   DisLikeCatImage({
     required this.favoriteId,
+    required this.imageId,
     required this.itemId,
   });
   final int favoriteId;
+  final String imageId;
+
   final int itemId;
 }
 
 class SetFavoriteId extends CatImagesEvent {
-  SetFavoriteId({
-    required this.favoriteId,
-    required this.itemId,
-  });
+  SetFavoriteId({required this.itemId, required this.imageId});
 
-  final int favoriteId;
   final int itemId;
+  final String imageId;
 }

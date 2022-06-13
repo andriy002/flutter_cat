@@ -25,7 +25,10 @@ class DisLikeCatImage extends CatFavoriteImagesEvent {
   DisLikeCatImage({
     required this.favoriteId,
     required this.itemId,
+    required,
+    required this.imageId,
   });
   final int favoriteId;
   final int itemId;
+  final String imageId;
 }

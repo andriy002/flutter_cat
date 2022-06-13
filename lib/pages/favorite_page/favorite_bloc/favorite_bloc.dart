@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:bloc/bloc.dart';
 import 'package:flutter_cat/models/act_fact_model/cat_fact_model.dart';
 import 'package:flutter_cat/models/act_fact_model/cat_fact_response_model.dart';
@@ -10,10 +8,11 @@ import 'package:flutter_cat/models/cat_api_model/cat_favorite_image_response.dar
 import 'package:flutter_cat/models/cat_api_model/pagination_model.dart';
 import 'package:flutter_cat/repositories/cat_api_repositories/cat_api_repositories.dart';
 import 'package:flutter_cat/repositories/cat_fact_repositories/cat_fact_repositories.dart';
+import 'package:flutter_cat/repositories/firebase_repositories/firestore_repositories.dart';
+import 'package:flutter_cat/services/cache_service.dart';
 import 'package:flutter_cat/utils/constants.dart';
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:meta/meta.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 part 'favorite_event.dart';
 part 'favorite_state.dart';
@@ -23,6 +22,7 @@ class CatFavoriteImagesBloc
   CatFavoriteImagesBloc({
     required this.catImagesRepository,
     required this.catFactRepository,
+    required this.firestoreRepositories,
   }) : super(const CatFavoriteImagesInitial()) {
     on<GetInitialList>(
       ((event, emit) async {
@@ -45,29 +45,19 @@ class CatFavoriteImagesBloc
             );
           }
         } else {
-          final sh = await SharedPreferences.getInstance();
+          final CatFavoriteImagesResponseModel? catApiFavoriteImageCacheList =
+              await CacheServices.instance.getCatApiFavoriteImagesCacheList();
 
-          if (sh.getString('catFavoriteImages') != null &&
-              sh.getString('factCat') != null) {
-            final CatFavoriteImagesResponseModel catImagesList =
-                CatFavoriteImagesResponseModel.fromJson(
-                    (jsonDecode(sh.getString('catFavoriteImages')!) as List), {
-              'pagination-count': ['0'],
-              'pagination-page': ['0']
-            });
+          final CatFactResponseModel? catFactApiCacheList =
+              await CacheServices.instance.getCatFactApiCacheList();
 
-            final CatFactResponseModel catFactsList =
-                CatFactResponseModel.fromJson(
-                    (jsonDecode(sh.getString('factCat')!) as List), {
-              'total': 0,
-              'current_page': 0,
-            });
-
+          if (catApiFavoriteImageCacheList != null &&
+              catFactApiCacheList != null) {
             emit(
               state.copyWith(
                 status: BlocStatus.success,
-                catImagesList: catImagesList.catImagesList,
-                catFactsList: catFactsList.catFactsList,
+                catImagesList: catApiFavoriteImageCacheList.catImagesList,
+                catFactsList: catFactApiCacheList.catFactsList,
                 paginationCatList: const PaginationCatImageModel(),
               ),
             );
@@ -121,7 +111,7 @@ class CatFavoriteImagesBloc
     });
 
     on<LikeCatImage>((event, emit) async {
-      final response = await catImagesRepository.likeCatImage(
+      final int? response = await catImagesRepository.likeCatImage(
         imageId: event.imageId,
       );
 
@@ -138,6 +128,8 @@ class CatFavoriteImagesBloc
             catImagesList: newList,
           ),
         );
+        await firestoreRepositories.saveLike(
+            imageId: event.imageId, favoriteId: response);
       }
     });
 
@@ -158,9 +150,14 @@ class CatFavoriteImagesBloc
             catImagesList: newList,
           ),
         );
+
+        await firestoreRepositories.removeLike(
+          imageId: event.imageId,
+        );
       }
     });
   }
   final CatApiRepository catImagesRepository;
+  final FirestoreRepositories firestoreRepositories;
   final CatFactRepository catFactRepository;
 }

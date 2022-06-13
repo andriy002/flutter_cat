@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_cat/blocs/cat_images_bloc/cat_images_bloc.dart';
-import 'package:flutter_cat/models/cat_api_model/cat_favorite_image.dart';
-import 'package:flutter_cat/models/cat_api_model/cat_image_model.dart';
+import 'package:flutter_cat/pages/home_page/cat_images_bloc/cat_images_bloc.dart';
+
 import 'package:flutter_cat/repositories/cat_api_repositories/cat_api_repositories.dart';
 import 'package:flutter_cat/repositories/cat_fact_repositories/cat_fact_repositories.dart';
+import 'package:flutter_cat/repositories/firebase_repositories/firestore_repositories.dart';
 import 'package:flutter_cat/utils/constants.dart';
 import 'package:flutter_cat/widgets/items/cat_Images_item.dart';
 import 'package:flutter_cat/widgets/navigation/custom_app_bar.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class HomePage extends StatefulWidget {
@@ -35,19 +36,15 @@ class _HomePageState extends State<HomePage> {
         );
   }
 
-  void _checkIsLike({
-    required List<CatImageModel> catImageList,
-    required List<CatFavoriteImageModel> catFavoriteImage,
+  Future<void> _checkIsLike({
     required int index,
     required BuildContext context,
-  }) {
-    final int i = catFavoriteImage
-        .indexWhere((e) => e.imageId == catImageList[index].imageId);
-
-    if (i != -1) {
+    required String imageId,
+  }) async {
+    if (await InternetConnectionChecker().hasConnection) {
       context.read<CatImagesBloc>().add(
             SetFavoriteId(
-              favoriteId: i,
+              imageId: imageId,
               itemId: index,
             ),
           );
@@ -66,14 +63,17 @@ class _HomePageState extends State<HomePage> {
         );
   }
 
-  void _disLikeCatImage(
-      {required BuildContext context,
-      required int favoriteId,
-      required int itemId}) {
+  void _disLikeCatImage({
+    required BuildContext context,
+    required int favoriteId,
+    required int itemId,
+    required String imageId,
+  }) {
     context.read<CatImagesBloc>().add(
           DisLikeCatImage(
             itemId: itemId,
             favoriteId: favoriteId,
+            imageId: imageId,
           ),
         );
   }
@@ -88,6 +88,7 @@ class _HomePageState extends State<HomePage> {
         create: (context) => CatImagesBloc(
           catImagesRepository: context.read<CatApiRepository>(),
           catFactRepository: context.read<CatFactRepository>(),
+          firestoreRepositories: context.read<FirestoreRepositories>(),
         )..add(
             GetInitialList(),
           ),
@@ -125,8 +126,7 @@ class _HomePageState extends State<HomePage> {
                                 catImage: state.catImagesList[i],
                                 fact: state.catFactsList[i].fact,
                                 checkIsLike: () => _checkIsLike(
-                                  catFavoriteImage: state.catFavoriteList,
-                                  catImageList: state.catImagesList,
+                                  imageId: state.catImagesList[i].imageId,
                                   index: i,
                                   context: context,
                                 ),
@@ -138,6 +138,7 @@ class _HomePageState extends State<HomePage> {
                                 ),
                                 onTapDisLike: () => _disLikeCatImage(
                                   context: context,
+                                  imageId: state.catImagesList[i].imageId,
                                   itemId: i,
                                   favoriteId: state.catImagesList[i].favoriteId,
                                 ),

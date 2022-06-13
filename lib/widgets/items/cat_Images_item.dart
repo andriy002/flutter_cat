@@ -82,7 +82,7 @@ class _CatImagesItemState extends State<CatImagesItem> {
         ),
         SplashBox(
           onTap: () async {
-            final bool isLike = await Navigator.of(
+            await Navigator.of(
               context,
               rootNavigator: true,
             ).push(
@@ -90,8 +90,8 @@ class _CatImagesItemState extends State<CatImagesItem> {
                 builder: (context) => _CatFacts(
                   args: _CatFactsArgument(
                     haConnection: _isHasConnection,
-                    onTapDisLike: widget.onTapDisLike,
-                    onTapLike: widget.onTapDisLike,
+                    onTapDisLike: () => widget.onTapDisLike(),
+                    onTapLike: widget.onTapLike,
                     index: widget.index,
                     catImage: widget.catImage,
                     fact: widget.fact,
@@ -99,11 +99,6 @@ class _CatImagesItemState extends State<CatImagesItem> {
                 ),
               ),
             );
-            if (isLike != widget.catImage.isLike) {
-              widget.catImage.isLike
-                  ? widget.onTapDisLike()
-                  : widget.onTapLike();
-            }
           },
         ),
         if (_isHasConnection)
@@ -123,7 +118,6 @@ class _CatImagesItemState extends State<CatImagesItem> {
           ),
       ],
     );
-    ;
   }
 }
 
@@ -182,6 +176,8 @@ class _CatFactsState extends State<_CatFacts> {
             : null,
         onAction: () => setState(() {
           _isLike = !_isLike;
+
+          !_isLike ? widget.args.onTapDisLike() : widget.args.onTapLike();
         }),
       ),
       body: Hero(

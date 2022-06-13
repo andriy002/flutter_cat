@@ -1,13 +1,9 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
-import 'package:flutter_cat/models/cat_api_model/cat_favorite_image.dart';
 import 'package:flutter_cat/models/cat_api_model/cat_favorite_image_response.dart';
 import 'package:flutter_cat/models/cat_api_model/cat_image_response_model.dart';
 import 'package:flutter_cat/models/user_model/user_model.dart';
 import 'package:flutter_cat/repositories/cat_api_repositories/base_repositories.dart';
 import 'package:flutter_cat/services/cache_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CatApiRepository {
   static final BaseCatApiRepository _baseRepository = BaseCatApiRepository();
@@ -46,23 +42,19 @@ class CatApiRepository {
     int page = 0,
     int size = 10,
   }) async {
-    final SharedPreferences sh = await SharedPreferences.getInstance();
-
-    final userJson = jsonDecode(sh.getString('profile')!);
-
-    final UserModel user = UserModel.fromJson(userJson);
+    final UserModel? user = await CacheServices.instance.getUser();
 
     final Response response = await _api.get(
       '/favourites',
       queryParameters: {
-        'sub_id': user.uid,
+        'sub_id': user?.uid,
         'limit': size,
         'page': page,
       },
     );
 
     if (response.statusCode == 200) {
-      if ((response.data as List).length > 5) {
+      if ((response.data as List).length > 10) {
         if (CacheServices.instance.isFirstSet('setFavoriteImages')) {
           CacheServices.instance.setElement(
             key: 'catFavoriteImages',
@@ -77,38 +69,14 @@ class CatApiRepository {
     return null;
   }
 
-  Future<List<CatFavoriteImageModel>?> getAllFavoriteCatList({
-    int page = 0,
-    int size = 10,
-  }) async {
-    final Response response = await _api.get(
-      '/favourites',
-      queryParameters: {
-        'sub_id': 'user-123',
-      },
-    );
-
-    if (response.statusCode == 200) {
-      return (response.data as List)
-          .map((e) => CatFavoriteImageModel.fromJson(e))
-          .toList();
-    }
-
-    return null;
-  }
-
   Future<int?> likeCatImage({required imageId}) async {
-    final SharedPreferences sh = await SharedPreferences.getInstance();
-
-    final userJson = jsonDecode(sh.getString('profile')!);
-
-    final UserModel user = UserModel.fromJson(userJson);
+    final UserModel? user = await CacheServices.instance.getUser();
 
     final Response response = await _api.post(
       '/favourites',
       data: {
         'image_id': imageId,
-        'sub_id': user.uid,
+        'sub_id': user?.uid,
       },
     );
 

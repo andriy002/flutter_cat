@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter_cat/repositories/firebase_repositories/firebase_repositories.dart';
+import 'package:flutter_cat/repositories/firebase_repositories/firebase_auth_repositories.dart';
 import 'package:flutter_cat/utils/constants.dart';
 import 'package:meta/meta.dart';
 
@@ -63,5 +62,5 @@ class AuthBloc extends Bloc<AuthEvent, AuthInitial> {
       }
     });
   }
-  final FireBaseRepositories fireBaseRepositories;
+  final FirebaseAuthRepositories fireBaseRepositories;
 }

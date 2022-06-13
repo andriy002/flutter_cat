@@ -1,12 +1,12 @@
-import 'dart:convert';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_cat/blocs/auth/auth_bloc.dart';
 import 'package:flutter_cat/models/user_model/user_model.dart';
 import 'package:flutter_cat/pages/auth_page/auth_page.dart';
+import 'package:flutter_cat/services/cache_service.dart';
 import 'package:flutter_cat/utils/constants.dart';
+import 'package:flutter_cat/widgets/loaders/image_loader.dart';
 import 'package:flutter_cat/widgets/navigation/custom_app_bar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -20,7 +20,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  UserModel? user;
+  UserModel? _user;
 
   final _textStyle = const TextStyle(
     fontWeight: FontWeight.w500,
@@ -34,11 +34,11 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _setInitialData() async {
-    final SharedPreferences sh = await SharedPreferences.getInstance();
-    if (sh.getString('profile') != null) {
+    final UserModel? user = await CacheServices.instance.getUser();
+
+    if (user != null) {
       setState(() {
-        final userJson = jsonDecode(sh.getString('profile')!);
-        user = UserModel.fromJson(userJson);
+        _user = user;
       });
     }
   }
@@ -74,27 +74,30 @@ class _ProfilePageState extends State<ProfilePage> {
                   ClipOval(
                     child: Container(
                       width: 160.0,
-                      color: Colors.amber[800],
+                      color: Colors.amber[600],
                       height: 160.0,
-                      child: user?.photoUrl != null
+                      child: _user?.photoUrl != null
                           ? CachedNetworkImage(
-                              imageUrl: user!.photoUrl!,
+                              imageUrl: _user!.photoUrl!,
                               fit: BoxFit.contain,
-                            )
+                              progressIndicatorBuilder: (_, __, progress) =>
+                                  ImageLoader(
+                                    progress: progress,
+                                  ))
                           : null,
                     ),
                   ),
                   const SizedBox(
                     height: 40.0,
                   ),
-                  if (user?.name != null)
+                  if (_user?.name != null)
                     Text(
-                      user!.name!,
+                      _user!.name!,
                       style: _textStyle,
                     ),
-                  if (user?.email != null)
+                  if (_user?.email != null)
                     Text(
-                      user!.email!,
+                      _user!.email!,
                       style: _textStyle,
                     ),
                   SizedBox(

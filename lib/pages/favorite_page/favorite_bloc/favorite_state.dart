@@ -12,7 +12,6 @@ class CatFavoriteImagesInitial {
   final BlocStatus status;
   final List<CatFavoriteImageModel> catImagesList;
   final List<CatFactModel> catFactsList;
-
   final PaginationCatImageModel paginationCatList;
   final PaginationCatFactModel paginationCatFact;
 

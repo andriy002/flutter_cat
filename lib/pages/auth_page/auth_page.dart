@@ -4,11 +4,37 @@ import 'package:flutter_cat/blocs/auth/auth_bloc.dart';
 import 'package:flutter_cat/pages/main_page.dart';
 import 'package:flutter_cat/resources/app_images.dart';
 import 'package:flutter_cat/utils/constants.dart';
+import 'package:internet_connection_checker/internet_connection_checker.dart';
 
-class AuthPage extends StatelessWidget {
+class AuthPage extends StatefulWidget {
   const AuthPage({Key? key}) : super(key: key);
 
   static const routeName = '/auth_page';
+
+  @override
+  State<AuthPage> createState() => _AuthPageState();
+}
+
+class _AuthPageState extends State<AuthPage> {
+  bool _isHasConnection = true;
+
+  @override
+  void initState() {
+    _checkInternet();
+    super.initState();
+  }
+
+  Future<void> _checkInternet() async {
+    if (await InternetConnectionChecker().hasConnection) {
+      setState(() {
+        _isHasConnection = true;
+      });
+    } else {
+      setState(() {
+        _isHasConnection = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,9 +75,11 @@ class AuthPage extends StatelessWidget {
               children: [
                 GestureDetector(
                   onTap: () {
-                    context.read<AuthBloc>().add(
-                          SignInGoogle(),
-                        );
+                    if (_isHasConnection) {
+                      context.read<AuthBloc>().add(
+                            SignInGoogle(),
+                          );
+                    }
                   },
                   child: Image.asset(
                     AppImages.googleLogo,
@@ -60,9 +88,11 @@ class AuthPage extends StatelessWidget {
                 ),
                 GestureDetector(
                   onTap: () {
-                    context.read<AuthBloc>().add(
-                          SignInFacebook(),
-                        );
+                    if (_isHasConnection) {
+                      context.read<AuthBloc>().add(
+                            SignInFacebook(),
+                          );
+                    }
                   },
                   child: Image.asset(
                     AppImages.facebookLogo,

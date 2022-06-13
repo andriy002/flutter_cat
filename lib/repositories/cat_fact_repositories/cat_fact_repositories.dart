@@ -30,6 +30,8 @@ class CatFactRepository {
         response.data,
       );
     }
+
+    return null;
   }
 
   Future<CatFactResponseModel?> getCatFacts({
